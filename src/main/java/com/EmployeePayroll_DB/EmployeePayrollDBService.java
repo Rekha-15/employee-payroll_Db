@@ -27,7 +27,12 @@ import model.EmployeePayrollData;
  */
 
 public class  EmployeePayrollDBService {
-
+	
+    /**
+     * get connection is a method used to connect the program to database.
+     * @return connection
+     * @throws SQLException
+     */
     private Connection getConnection() throws SQLException {
         String jdbcURL = "jdbc:mysql://localhost:3306/payroll_service?useSSL=false";
         String username = "root";
@@ -39,7 +44,7 @@ public class  EmployeePayrollDBService {
     }
 
     /**
-     * readsata method we will select table query.
+     * readdata method we will select table query.
      * @return employeePayrollList
      */
     
