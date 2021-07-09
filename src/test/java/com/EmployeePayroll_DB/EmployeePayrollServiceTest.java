@@ -11,24 +11,43 @@ import org.junit.Assert;
 import org.junit.Test;
 import model.EmployeePayrollData;
 import java.util.List;
+
 /**
- * EmployeePayrollServiceTest is a testing
+ * EmployeePayrollServiceTest is a testing 
  * Testing for both true and false scenario
+ * 
  * @author rekha
- *
  */
+
 public class EmployeePayrollServiceTest {
 	@Test
 	public void givenEmployeePayrollInDB_WhenRetrieved_ShouldMatchEmployeeCount() {
 		EmployeePayrollDBService employeePayrollDBService = new EmployeePayrollDBService();
 		List<EmployeePayrollData> employeePayrollDataList = employeePayrollDBService.readData();
-		Assert.assertEquals(3, employeePayrollDataList.size());
+		Assert.assertEquals(4, employeePayrollDataList.size());
 	}
-	
+
+	/**
+	 * In this test case given a EmployeePayrollInDB 
+	 * When it Retrieved it Should not Match EmployeeCount.
+	 */
 	@Test
 	public void givenEmployeePayrollInDB_WhenRetrieved_ShouldnotMatchEmployeeCount() {
 		EmployeePayrollDBService employeePayrollDBService = new EmployeePayrollDBService();
 		List<EmployeePayrollData> employeePayrollDataList = employeePayrollDBService.readData();
-		Assert.assertNotSame(4, employeePayrollDataList.size());
+		Assert.assertNotSame(5, employeePayrollDataList.size());
+	}
+
+	/**
+	 * In this test case given New Employee Salary Should Update With Database.
+	 */
+	@Test
+	public void givenNewEmployeeSalaryShouldUpdateWithDatabase() {
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		List<EmployeePayrollData> employeePayrollDataList = employeePayrollService
+				.readEmployeePayrollData(EmployeePayrollService.IOService.DB_IO);
+		employeePayrollService.updateEmployeebasic_pay("Terisa", 3000000.00);
+		boolean result = employeePayrollService.checkEmployeePayrollInSyncWithDB("Terisa");
+		Assert.assertTrue(result);
 	}
 }

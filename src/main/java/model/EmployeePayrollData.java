@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 /**
- * EmployeePayrollData is class of public type ,pojo class
+ * EmployeePayrollData is class of public type ,Pojo class
  * 
  * @author rekha
  *
@@ -19,19 +19,32 @@ import java.util.Objects;
 public class EmployeePayrollData {
 	public int id;
 	public String name;
-	public double salary;
+	public double basic_pay;
 	public LocalDate startDate;
 
-	public EmployeePayrollData(int id, String name, double salary, LocalDate startDate) {
+	/**
+	 * Parameterized constructor is created.
+	 * 
+	 * @param id
+	 * @param name
+	 * @param basic_pay
+	 * @param startDate
+	 */
+
+	public EmployeePayrollData(int id, String name, double basic_pay, LocalDate startDate) {
 		this.id = id;
 		this.name = name;
-		this.salary = salary;
+		this.basic_pay = basic_pay;
 		this.startDate = startDate;
 	}
 
+	/**
+	 * This method use to print all the value.
+	 */
+
 	@Override
 	public String toString() {
-		return "EmployeePayrollData{" + "id=" + id + ", name='" + name + '\'' + ", salary=" + salary + ", startDate="
+		return "EmployeePayrollData{" + "id=" + id + ", name='" + name + '\'' + ", basic_pay=" + basic_pay + ", startDate="
 				+ startDate + '}';
 	}
 
@@ -42,6 +55,6 @@ public class EmployeePayrollData {
 		if (o == null || getClass() != o.getClass())
 			return false;
 		EmployeePayrollData that = (EmployeePayrollData) o;
-		return id == that.id && Double.compare(that.salary, salary) == 0 && Objects.equals(name, that.name);
+		return id == that.id && Double.compare(that.basic_pay, basic_pay) == 0 && Objects.equals(name, that.name);
 	}
 }
