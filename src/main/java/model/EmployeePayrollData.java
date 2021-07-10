@@ -8,53 +8,81 @@
 package model;
 
 import java.time.LocalDate;
-import java.util.Objects;
 
-/**
- * EmployeePayrollData is class of public type ,Pojo class
- * 
- * @author rekha
- *
- */
 public class EmployeePayrollData {
-	public int id;
-	public String name;
-	public double basic_pay;
-	public LocalDate startDate;
+    public LocalDate startDate;
+    private int id;
+    private String name;
+    private Double salary;
 
-	/**
-	 * Parameterized constructor is created.
-	 * 
-	 * @param id
-	 * @param name
-	 * @param basic_pay
-	 * @param startDate
-	 */
+    /**
+     * created a parameterized constructor
+     * @param id id
+     * @param name name
+     * @param salary salary
+     */
+    public EmployeePayrollData(int id, String name, Double salary) {
+        setId(id);
+        setName(name);
+        setSalary(salary);
+    }
 
-	public EmployeePayrollData(int id, String name, double basic_pay, LocalDate startDate) {
-		this.id = id;
-		this.name = name;
-		this.basic_pay = basic_pay;
-		this.startDate = startDate;
-	}
+    /**
+     * overloading  parameterized constructor
+     * @param id id
+     * @param name name
+     * @param salary salary
+     * @param startDate startDate
+     */
+    public EmployeePayrollData(int id, String name, Double salary,LocalDate startDate) {
+        setId(id);
+        setName(name);
+        setSalary(salary);
+        this.startDate = startDate;
+    }
 
-	/**
-	 * This method use to print all the value.
-	 */
+    //added getters and setters for id, name, salary
+    public int getId() {
+        return id;
+    }
 
-	@Override
-	public String toString() {
-		return "EmployeePayrollData{" + "id=" + id + ", name='" + name + '\'' + ", basic_pay=" + basic_pay + ", startDate="
-				+ startDate + '}';
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
-		EmployeePayrollData that = (EmployeePayrollData) o;
-		return id == that.id && Double.compare(that.basic_pay, basic_pay) == 0 && Objects.equals(name, that.name);
-	}
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Double getSalary() {
+        return salary;
+    }
+
+    public void setSalary(Double salary) {
+        this.salary = salary;
+    }
+
+    //Override toSting method
+    @Override
+    public String toString() {
+        return "EmployeePayRollData{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", salary=" + salary +
+                '}'+'\n';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        EmployeePayrollData that = (EmployeePayrollData) o;
+        return id == that.id &&
+                     Double.compare(that.getSalary(), salary) == 0 &&
+                     name.equals(that.getName());
+    }
 }

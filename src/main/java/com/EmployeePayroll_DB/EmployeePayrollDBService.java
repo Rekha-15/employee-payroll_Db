@@ -6,12 +6,7 @@
  ************************************************************************************************/
 package com.EmployeePayroll_DB;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,210 +15,162 @@ import java.util.Map;
 
 import model.EmployeePayrollData;
 
-/**
- * steps to follow to connect Java application with database 1) Import java.sql
- * 2) Load and register the driver 3) Create connection 4) Create a statement
- * 5)Execute the query 6) Process the results 7) Close resources
- */
+public class EmployeePayrollDBService  {
+    //declared private variables
+    private PreparedStatement employeePayrollDataStatement;
+    private static EmployeePayrollDBService employeePayrollDBService;
 
-public class EmployeePayrollDBService {
+    // private default constructor
+    private EmployeePayrollDBService() {
 
-	private static EmployeePayrollDBService employeePayrollDBService;
-	private PreparedStatement employeePayrollDataStatement;
-
-	public static EmployeePayrollDBService getInstant() {
-		if (employeePayrollDBService == null)
-			employeePayrollDBService = new EmployeePayrollDBService();
-		return employeePayrollDBService;
-	}
-
-	/**
-	 * Attempts to establish a connection to the given database URL. The
-	 * DriverManager attempts to select an appropriate driver from the set of
-	 * registered JDBC drivers.
-	 * 
-	 * @return connection
-	 * @throws SQLException
-	 */
-	private Connection getConnection() throws SQLException {
-		String jdbcURL = "jdbc:mysql://localhost:3306/payroll_service?useSSL=false";
-		String username = "root";
-		String password = "root15";
-		System.out.println("connecting to database");
-		Connection connection = DriverManager.getConnection(jdbcURL, username, password);
-		System.out.println("Connected Successfully!");
-		return connection;
-	}
-
-	/**
-	 * readData method reads the data and puts it into the ArrayList
-	 * 
-	 * @return employeePayrollList
-	 */
-
-	public ArrayList<EmployeePayrollData> readData() {
-		String sql = "SELECT * FROM employee_payroll";
-		ArrayList<EmployeePayrollData> employeePayrollList = new ArrayList<EmployeePayrollData>();
-		try {
-			Connection connection = this.getConnection();
-			Statement statement = connection.createStatement();
-			ResultSet resultSet = statement.executeQuery(sql);
-			while (resultSet.next()) {
-				int id = resultSet.getInt("id");
-				String name = resultSet.getString("name");
-				double basic_pay = resultSet.getDouble("basic_pay");
-				LocalDate startDate = resultSet.getDate("start").toLocalDate();
-				employeePayrollList.add(new EmployeePayrollData(id, name, basic_pay, startDate));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return employeePayrollList;
-	}
-
-	/**
-	 * getEmployeePayrollData method
-	 * Function to get basic_pay by name
-	 * @param name
-	 * @return employeePayrollDataList
-	 */
-	public List<EmployeePayrollData> getEmployeePayrollData(String name) {
-		List<EmployeePayrollData> employeePayrollDataList = null;
-		if (this.employeePayrollDataStatement == null)
-			this.prepareStatementForEmployeeData();
-		try {
-			employeePayrollDataStatement.setString(1, name);
-			ResultSet resultSet;
-			resultSet = employeePayrollDataStatement.executeQuery();
-			employeePayrollDataList = this.getEmployeePayrollData(resultSet);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return employeePayrollDataList;
-	}
-
-	/**
-	 * @param resultSet
-	 * @return
-	 */
-	private List<EmployeePayrollData> getEmployeePayrollData(ResultSet resultSet) {
-		List<EmployeePayrollData> employeePayrollDataList = new ArrayList<>();
-		try {
-			while (resultSet.next()) {
-				int id = resultSet.getInt("id");
-				String name = resultSet.getString("name");
-				double basic_pay = resultSet.getDouble("basic_pay");
-				LocalDate startDate = null;
-				startDate = resultSet.getDate("start").toLocalDate();
-				employeePayrollDataList.add(new EmployeePayrollData(id, name, basic_pay, startDate));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return employeePayrollDataList;
-	}
-
-	//prepare Statement
-    private void prepareStatementForEmployeeData() {
-        try {
-            Connection connection = this.getConnection();
-            String sql = "SELECT * FROM employee_payroll WHERE name = ?";
-            employeePayrollDataStatement = connection.prepareStatement(sql);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
-    public int updateEmployeeData (String name, double basic_pay) {
-        return this.updateEmployeeDataUsingStatement(name, basic_pay);
+    /**
+     * used singleton design pattern to use  single instance at a time  by using getInstance() method
+     * @return employeePayrollDBService
+     */
+    public static EmployeePayrollDBService getInstance() {
+        if (employeePayrollDBService == null)
+            employeePayrollDBService = new EmployeePayrollDBService();
+        return employeePayrollDBService;
     }
 
-    private int updateEmployeeDataUsingStatement(String name, double basic_pay) {
-        String sql = String.format("update employee_payroll set basic_pay = %.2f where name = '%s';", basic_pay, name);
-        try (Connection connection = this.getConnection()){
+    /**
+     * created getConnection() method to make connection with mysql database
+     * @return connection
+     * @throws SQLException sql exception
+     */
+    private Connection getConnection() throws SQLException {
+        String jdbcURL = "jdbc:mysql://localhost:3306/payroll_service?useSSL=false";
+        String username = "root";
+        String password = "Dinnu@247";
+        Connection connection;
+        System.out.println("Connecting to database " +jdbcURL);
+        connection = DriverManager.getConnection(jdbcURL, username, password);
+        System.out.println("Connection is Successful! " +connection);
+        return connection;
+    }
+
+    /**
+     * created a readData() method to read data from database table
+     * added try and catch block to throw sql exception
+     * @return employeePayrollDataList
+     */
+    public List<EmployeePayrollData> readData() {
+        String sql = "SELECT * FROM employee_payroll; ";
+        return this.getEmployeePayrollDataUDINGDB(sql);
+    }
+
+    /**
+     * created getEmployeePayrollDataForDateRange method to retrieve data from data base in a particular date range
+     * @param startDate startDate in LocalDate format
+     * @param endDate endDate in LocalDate format
+     * @return this.getEmployeePayrollDataUDINGDB(sql)
+     */
+    public List<EmployeePayrollData> getEmployeePayrollDataForDateRange(LocalDate startDate, LocalDate endDate) {
+        String sql = String.format("SELECT * FROM employee_payroll WHERE START BETWEEN '%s' AND '%s';",
+                Date.valueOf(startDate),Date.valueOf(endDate));
+        return this.getEmployeePayrollDataUDINGDB(sql);
+    }
+
+    /**
+     * created getEmployeePayrollDataUDINGDB method to retrieve data from database
+     * by taking sql query input from
+     * @param sql getEmployeePayrollDataForDateRange
+     * @return employeePayrollDataList;
+     */
+    private List<EmployeePayrollData> getEmployeePayrollDataUDINGDB(String sql) {
+        List<EmployeePayrollData> employeePayrollDataList = new ArrayList<>();
+        try (Connection connection = this.getConnection()) {
             Statement statement = connection.createStatement();
-            return statement.executeUpdate(sql);
-        }catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
+            ResultSet resultSet = statement.executeQuery(sql);
+            employeePayrollDataList = this.getEmployeePayrollData(resultSet);
 
-    public List<EmployeePayrollData> retrieveEmployeePayrollDataRange(String startDate, String endDate) {
-        List<EmployeePayrollData> employeePayrollDataList = null;
-        try {
-            if (this.employeePayrollDataStatement == null)
-                this.prepareStatementForRetrieveEmployeePayrollDateRange();
-            employeePayrollDataStatement.setString(1, startDate);
-            employeePayrollDataStatement.setString(2, endDate);
-            ResultSet resultSet;
-            resultSet = employeePayrollDataStatement.executeQuery();
-            employeePayrollDataList = this.retrieveEmployeePayrollDataRange(resultSet);
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return employeePayrollDataList;
     }
 
-    private List<EmployeePayrollData> retrieveEmployeePayrollDataRange(ResultSet resultSet) {
-        List<EmployeePayrollData> employeePayrollDataList = new ArrayList<>();
+    /**
+     * created getEmployeePayrollData method to get data from database
+     * added try and catch block to throw sql exception
+     * @param name name
+     * @return employeePayrollDataList
+     */
+    public List<EmployeePayrollData> getEmployeePayrollData(String name) {
+        List<EmployeePayrollData> employeePayrollDataList = null;
+        if (this.employeePayrollDataStatement == null)
+            this.prepareStatementForEmployeeData();
         try {
-            while (resultSet.next()){
+            employeePayrollDataStatement.setString(1, name);
+            ResultSet resultSet = employeePayrollDataStatement.executeQuery();
+            employeePayrollDataList = this.getEmployeePayrollData(resultSet);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return employeePayrollDataList;
+    }
+
+    /**
+     * created private getEmployeePayrollData method to get all data from database table
+     * added try and catch block to throw sql exception
+     * @param resultSet resultSet
+     * @return employeePayrollDataList
+     */
+    private List<EmployeePayrollData> getEmployeePayrollData(ResultSet resultSet) {
+        List<EmployeePayrollData> employeePayrollDataList =new ArrayList<>();
+        try {
+            while (resultSet.next()) {
                 int id = resultSet.getInt("id");
                 String name = resultSet.getString("name");
-                double basic_pay = resultSet.getDouble("basic_pay");
+                double salary = resultSet.getDouble("salary");
                 LocalDate startDate = resultSet.getDate("start").toLocalDate();
-                employeePayrollDataList.add(new EmployeePayrollData(id, name, basic_pay, startDate));
+                employeePayrollDataList.add(new EmployeePayrollData(id, name, salary,startDate));
             }
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return employeePayrollDataList;
     }
 
-    private void prepareStatementForRetrieveEmployeePayrollDateRange() {
-        Connection connection = null;
-        try {
-            connection = this.getConnection();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        String sql = "SELECT * FROM employee_payroll WHERE start BETWEEN ? AND ?";
-        try {
-            assert connection != null;
-            employeePayrollDataStatement = connection.prepareStatement(sql);
-        } catch (SQLException throwable) {
-        	throwable.printStackTrace();
-        }
-    }
-
+    /**
+     * created getAverageSalaryByGender method to get average salary group by gender data from database
+     * by using mysql query in the method and mapped gender and averageSalary
+     * @return genderToAverageSalaryMap
+     */
     public Map<String, Double> getAverageSalaryByGender() {
-        String sql = "SELECT gender,AVG(salary) FROM employee_payroll GROUP BY gender;";
-        Map<String,Double> genderToAvgSalaryMap = new HashMap<>();
-        try(Connection connection = this.getConnection()){
+        String sql = "SELECT gender, AVG(salary) as average_salary FROM employee_payroll GROUP BY GENDER;";
+        Map<String, Double> genderToAverageSalaryMap = new HashMap<>();
+        try (Connection connection = this.getConnection()){
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(sql);
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 String gender = resultSet.getString("gender");
-                double salary = resultSet.getDouble("AVG(salary)");
-                genderToAvgSalaryMap.put(gender, salary);
+                Double averageSalary = resultSet.getDouble("average_salary");
+                genderToAverageSalaryMap.put(gender, averageSalary);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return genderToAvgSalaryMap;
+        return genderToAverageSalaryMap;
     }
 
+    /**
+     * created getAverageSalaryByGender method to get sum salary group by gender data from database
+     * by using mysql query in the method and mapped gender and sumSalary
+     * @return genderToSumSalaryMap
+     */
     public Map<String, Double> getSumSalaryByGender() {
-        String sql = "SELECT gender,SUM(salary) FROM employee_payroll GROUP BY gender;";
-        Map<String,Double> genderToSumSalaryMap = new HashMap<>();
-        try(Connection connection = this.getConnection()){
+        String sql = "SELECT gender, SUM(salary) as sum_salary FROM employee_payroll GROUP BY GENDER;";
+        Map<String, Double> genderToSumSalaryMap = new HashMap<>();
+        try (Connection connection = this.getConnection()){
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(sql);
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 String gender = resultSet.getString("gender");
-                double salary = resultSet.getDouble("SUM(salary)");
-                genderToSumSalaryMap.put(gender, salary);
+                Double sumSalary = resultSet.getDouble("sum_salary");
+                genderToSumSalaryMap.put(gender, sumSalary);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -231,54 +178,141 @@ public class EmployeePayrollDBService {
         return genderToSumSalaryMap;
     }
 
-    public Map<String, Double> getMinSalaryByGender() {
-        String sql = "SELECT gender,MIN(salary) FROM employee_payroll GROUP BY gender;";
-        Map<String,Double> genderToMinSalaryMap = new HashMap<>();
-        try(Connection connection = this.getConnection()){
+    /**
+     * created getMinimumSalaryByGender method to get minimum salary group by gender data from database
+     * by using mysql query in the method and mapped gender and minimumSalary
+     * @return genderToMinimumSalaryMap
+     */
+    public Map<String, Double> getMinimumSalaryByGender() {
+        String sql = "SELECT gender, Min(salary) as minimum_salary FROM employee_payroll GROUP BY GENDER;";
+        Map<String, Double> genderToMinimumSalaryMap = new HashMap<>();
+        try (Connection connection = this.getConnection()){
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(sql);
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 String gender = resultSet.getString("gender");
-                double salary = resultSet.getDouble("MIN(salary)");
-                genderToMinSalaryMap.put(gender, salary);
+                Double minimumSalary = resultSet.getDouble("minimum_salary");
+                genderToMinimumSalaryMap.put(gender, minimumSalary);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return genderToMinSalaryMap;
+        return genderToMinimumSalaryMap;
     }
 
-    public Map<String, Double> getMaxSalaryByGender() {
-        String sql = "SELECT gender,MAX(salary) FROM employee_payroll GROUP BY gender;";
-        Map<String,Double> genderToMaxSalaryMap = new HashMap<>();
-        try(Connection connection = this.getConnection()){
+    /**
+     * created getMaximumSalaryByGender method to get maximum salary group by gender data from database
+     * by using mysql query in the method and mapped gender and maximumSalary
+     * @return genderToMaximumSalaryMap
+     */
+    public Map<String, Double> getMaximumSalaryByGender() {
+        String sql = "SELECT gender, Max(salary) as maximum_salary FROM employee_payroll GROUP BY GENDER;";
+        Map<String, Double> genderToMaximumSalaryMap = new HashMap<>();
+        try (Connection connection = this.getConnection()){
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(sql);
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 String gender = resultSet.getString("gender");
-                double salary = resultSet.getDouble("MAX(salary)");
-                genderToMaxSalaryMap.put(gender, salary);
+                Double maximumSalary = resultSet.getDouble("maximum_salary");
+                genderToMaximumSalaryMap.put(gender, maximumSalary);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return genderToMaxSalaryMap;
+        return genderToMaximumSalaryMap;
     }
 
-    public Map<String, Integer> getCountByGender() {
-        String sql = "SELECT gender,COUNT(gender) FROM employee_payroll GROUP BY gender;";
-        Map<String,Integer> genderCount = new HashMap<>();
-        try(Connection connection = this.getConnection()){
+    /**
+     * created getCountNameByGender method to get count name group by gender data from database
+     * by using mysql query in the method and mapped gender and countName
+     * @return genderToCountNameMap
+     */
+    public Map<String, Integer> getCountNameByGender() {
+        String sql = "SELECT gender, COUNT(name) as count_name FROM employee_payroll GROUP BY GENDER;";
+        Map<String, Integer> genderToCountNameMap = new HashMap<>();
+        try (Connection connection = this.getConnection()){
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(sql);
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 String gender = resultSet.getString("gender");
-                int count = resultSet.getInt("COUNT(gender)");
-                genderCount.put(gender, count);
+                Integer countName = resultSet.getInt("count_name");
+                genderToCountNameMap.put(gender, countName);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return genderCount;
+        return genderToCountNameMap;
+    }
+
+    /**
+     * created a updateEmployeeData method to update data in database table
+     * added try and catch block to throw sql exception
+     * @param name name
+     * @param salary salary
+     * @return this.updateEmployeeDataUsingStatement(name, salary)
+     */
+    public int updateEmployeeData(String name, double salary) {
+        return this.updateEmployeeDataUsingStatement(name, salary);
+    }
+
+    /**
+     * created updateEmployeeDataUsingStatement method to update data in database by using sql query
+     * added try and catch block to throw sql exception
+     * @param name name
+     * @param salary salary
+     * @return statement.executeUpdate(sql)
+     */
+    private int updateEmployeeDataUsingStatement(String name, double salary) {
+        String sql = String.format("update employee_payroll set salary = %.2f where name = '%s';", salary, name);
+        try(Connection connection = this.getConnection()) {
+            Statement statement = connection.createStatement();
+            return statement.executeUpdate(sql);
+        } catch (SQLException sqlException) {
+            sqlException.printStackTrace();
+        }
+        return 0;
+    }
+
+    /**
+     * prepareStatementForEmployeeData method for single query to get the data from database
+     * added try and catch block to throw sql exception
+     */
+    private void prepareStatementForEmployeeData() {
+        try {
+            Connection connection = this.getConnection();
+            String sql = "SELECT * FROM employee_payroll Where name = ?";
+            employeePayrollDataStatement = connection.prepareStatement(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * added new employee to database
+     * @param employeeName employee name
+     * @param gender gender
+     * @param salary salary
+     * @param startDate start date
+     * @return employeePayrollData
+     */
+    public EmployeePayrollData addEmployeeToPayroll(String employeeName, String gender, double salary, LocalDate startDate) {
+        int employeeId = -1;
+        EmployeePayrollData employeePayrollData = null;
+        String sql = String.format("INSERT INTO employee_payroll (name, gender, salary, start) " +
+                                   "VALUES('%s', '%s', '%s', '%s');", employeeName, gender, salary, startDate);
+
+        try(Connection connection = this.getConnection()) {
+            Statement statement = connection.createStatement();
+            int rowAffected = statement.executeUpdate(sql, statement.RETURN_GENERATED_KEYS);
+            if (rowAffected == 1) {
+                ResultSet resultSet = statement.getGeneratedKeys();
+                if (resultSet.next())
+                    employeeId = resultSet.getInt(1);
+            }
+            employeePayrollData = new EmployeePayrollData(employeeId, employeeName, salary, startDate);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return employeePayrollData;
     }
 }
