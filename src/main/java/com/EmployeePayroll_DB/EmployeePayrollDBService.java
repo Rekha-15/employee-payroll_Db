@@ -81,7 +81,7 @@ public class EmployeePayrollDBService {
 
 	/**
 	 * getEmployeePayrollData method
-	 * Function to get salary by name
+	 * Function to get basic_pay by name
 	 * @param name
 	 * @return employeePayrollDataList
 	 */
@@ -132,12 +132,12 @@ public class EmployeePayrollDBService {
         }
     }
 
-    public int updateEmployeeData (String name, double salary) {
-        return this.updateEmployeeDataUsingStatement(name, salary);
+    public int updateEmployeeData (String name, double basic_pay) {
+        return this.updateEmployeeDataUsingStatement(name, basic_pay);
     }
 
-    private int updateEmployeeDataUsingStatement(String name, double salary) {
-        String sql = String.format("update employee_payroll set salary = %.2f where name = '%s';", salary, name);
+    private int updateEmployeeDataUsingStatement(String name, double basic_pay) {
+        String sql = String.format("update employee_payroll set basic_pay = %.2f where name = '%s';", basic_pay, name);
         try (Connection connection = this.getConnection()){
             Statement statement = connection.createStatement();
             return statement.executeUpdate(sql);
@@ -145,5 +145,53 @@ public class EmployeePayrollDBService {
             e.printStackTrace();
         }
         return 0;
+    }
+
+    public List<EmployeePayrollData> retrieveEmployeePayrollDataRange(String startDate, String endDate) {
+        List<EmployeePayrollData> employeePayrollDataList = null;
+        try {
+            if (this.employeePayrollDataStatement == null)
+                this.prepareStatementForRetrieveEmployeePayrollDateRange();
+            employeePayrollDataStatement.setString(1, startDate);
+            employeePayrollDataStatement.setString(2, endDate);
+            ResultSet resultSet;
+            resultSet = employeePayrollDataStatement.executeQuery();
+            employeePayrollDataList = this.retrieveEmployeePayrollDataRange(resultSet);
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return employeePayrollDataList;
+    }
+
+    private List<EmployeePayrollData> retrieveEmployeePayrollDataRange(ResultSet resultSet) {
+        List<EmployeePayrollData> employeePayrollDataList = new ArrayList<>();
+        try {
+            while (resultSet.next()){
+                int id = resultSet.getInt("id");
+                String name = resultSet.getString("name");
+                double basic_pay = resultSet.getDouble("basic_pay");
+                LocalDate startDate = resultSet.getDate("start").toLocalDate();
+                employeePayrollDataList.add(new EmployeePayrollData(id, name, basic_pay, startDate));
+            }
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return employeePayrollDataList;
+    }
+
+    private void prepareStatementForRetrieveEmployeePayrollDateRange() {
+        Connection connection = null;
+        try {
+            connection = this.getConnection();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        String sql = "SELECT * FROM employee_payroll WHERE start BETWEEN ? AND ?";
+        try {
+            assert connection != null;
+            employeePayrollDataStatement = connection.prepareStatement(sql);
+        } catch (SQLException throwable) {
+            throwable.printStackTrace();
+        }
     }
 }
