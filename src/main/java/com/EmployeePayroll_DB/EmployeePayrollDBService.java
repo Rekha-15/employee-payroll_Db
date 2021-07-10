@@ -121,28 +121,29 @@ public class EmployeePayrollDBService {
 		return employeePayrollDataList;
 	}
 
-	private void prepareStatementForEmployeeData() {
-		try {
-			Connection connection = this.getConnection();
-			String sql = "SELECT * FROM employee_payroll WHERE name = ?";
-			employeePayrollDataStatement = connection.prepareStatement(sql);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
+	//prepare Statement
+    private void prepareStatementForEmployeeData() {
+        try {
+            Connection connection = this.getConnection();
+            String sql = "SELECT * FROM employee_payroll WHERE name = ?";
+            employeePayrollDataStatement = connection.prepareStatement(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
-	public int updateEmployeeData(String name, double basic_pay) {
-		return this.updateEmployeeDataUsingStatement(name, basic_pay);
-	}
+    public int updateEmployeeData (String name, double salary) {
+        return this.updateEmployeeDataUsingStatement(name, salary);
+    }
 
-	private int updateEmployeeDataUsingStatement(String name, double basic_pay) {
-		String sql = String.format("update employee_payroll set basic_pay = %.2f where name = '%s';", basic_pay, name);
-		try (Connection connection = this.getConnection()) {
-			Statement statement = connection.createStatement();
-			return statement.executeUpdate(sql);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return 0;
-	}
+    private int updateEmployeeDataUsingStatement(String name, double salary) {
+        String sql = String.format("update employee_payroll set salary = %.2f where name = '%s';", salary, name);
+        try (Connection connection = this.getConnection()){
+            Statement statement = connection.createStatement();
+            return statement.executeUpdate(sql);
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }
