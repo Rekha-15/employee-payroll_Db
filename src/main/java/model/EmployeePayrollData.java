@@ -7,7 +7,7 @@
 
 package model;
 
-iimport java.time.LocalDate;
+import java.time.LocalDate;
 
 public class EmployeePayrollData {
     public LocalDate startDate;

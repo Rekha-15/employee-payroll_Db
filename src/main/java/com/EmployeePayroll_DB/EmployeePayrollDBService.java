@@ -7,24 +7,24 @@
 package com.EmployeePayroll_DB;
 
 import java.sql.*;
-import java.sql.Date;
 import java.time.LocalDate;
-import java.util.*;
-
-import model.EmployeePayrollData;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class EmployeePayrollDBService  {
     //declared private variables
     private PreparedStatement employeePayrollDataStatement;
     private static EmployeePayrollDBService employeePayrollDBService;
 
-    // private default constructor
+    //created private default constructor
     private EmployeePayrollDBService() {
 
     }
 
     /**
-     * used singleton design pattern to use  single instance at a time  by using getInstance() method
+     * created singleton design pattern to single instance by using getInstance() method
      * @return employeePayrollDBService
      */
     public static EmployeePayrollDBService getInstance() {
@@ -83,7 +83,6 @@ public class EmployeePayrollDBService  {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(sql);
             employeePayrollDataList = this.getEmployeePayrollData(resultSet);
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -283,62 +282,5 @@ public class EmployeePayrollDBService  {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * added new employee and payroll details to table in data base to database
-     * @param employeeName employee name
-     * @param gender gender
-     * @param basic_pay salary
-     * @param startDate start date
-     * @return employeePayrollData
-     */
-    public EmployeePayrollData addEmployeeToPayroll(String employeeName, String gender, double basic_pay, LocalDate startDate) {
-        int employee_id = -1;
-        Connection connection = null;
-        EmployeePayrollData employeePayrollData = null;
-        try {
-            connection = this.getConnection();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        try(Statement statement = Objects.requireNonNull(connection).createStatement()) {
-
-            String sql = String.format("INSERT INTO employee_payroll (name, gender, salary, start) " +
-                    "VALUES('%s', '%s', '%s', '%s');", employeeName, gender, basic_pay, Date.valueOf(startDate));
-            int rowAffected = statement.executeUpdate(sql, statement.RETURN_GENERATED_KEYS);
-            if (rowAffected == 1) {
-                ResultSet resultSet = statement.getGeneratedKeys();
-                if (resultSet.next())
-                    employee_id = resultSet.getInt(1);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        try (Statement statement = Objects.requireNonNull(connection).createStatement()){
-            double deductions = basic_pay*0.2;
-            double taxble_pay = basic_pay - deductions;
-            double incom_tax =  taxble_pay*0.1;
-            double net_pay = basic_pay - incom_tax;
-            String sql = String.format("INSERT INTO payroll_details " +
-                    "(employee_id, basic_pay, deductions, taxble_pay, incom_tax, net_pay)" +
-                    "VALUES (%s, %s, %s, %s, %s, %s ); ", employee_id, basic_pay, deductions, taxble_pay, incom_tax, net_pay);
-            int rowAffected1 = statement.executeUpdate(sql, statement.RETURN_GENERATED_KEYS);
-            if (rowAffected1 == 1) {
-                    employeePayrollData = new EmployeePayrollData(employee_id, employeeName, basic_pay, startDate);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                Objects.requireNonNull(connection).close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return employeePayrollData;
     }
 }

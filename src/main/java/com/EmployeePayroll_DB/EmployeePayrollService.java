@@ -41,7 +41,7 @@ public class EmployeePayrollService {
     }
 
     /**
-     * created readEmployeePayrollData method to read data from console
+     * created readEmployeePayrollData from console
      * @param consoleInputReader consoleInputReader
      */
     private void readEmployeePayrollData(Scanner consoleInputReader) {
@@ -171,17 +171,6 @@ public class EmployeePayrollService {
     public boolean checkEmployeePayrollSyncWithDB(String name) {
         List<EmployeePayrollData> employeePayrollDataList = employeePayrollDBService.getEmployeePayrollData(name);
         return employeePayrollDataList.get(0).equals(getEmployeePayrollData(name));
-    }
-
-    /**
-     * added new employee to employeePayrollList
-     * @param employeeName employeeName
-     * @param gender gender
-     * @param salary salary
-     * @param startDate start date
-     */
-    public void addEmployeeToPayroll(String employeeName, String gender, double salary, LocalDate startDate) {
-        employeePayrollList.add(employeePayrollDBService.addEmployeeToPayroll(employeeName, gender, salary, startDate));
     }
 
     /**
